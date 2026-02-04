@@ -1,16 +1,127 @@
-# React + Vite
+# Crypto Trading Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A powerful, secure, and scalable Crypto Trading & Portfolio Management Platform built with modern technologies.
+This platform enables users to buy, sell, transfer, and manage cryptocurrencies seamlessly — powered by real-time APIs and advanced security features.
 
-Currently, two official plugins are available:
+# Backend Repository
+Repository-> https://github.com/niteshgiri-cse/ChainTrade_cryptoTreading/tree/main
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+# Comprehensive Feature Set
+Get real-time cryptocurrency prices
 
-## React Compiler
+Access up-to-date market data
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Receive instant Response
 
-## Expanding the ESLint configuration
+# Buy & Sell Crypto
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+User-friendly trading interface
+
+Support for multiple cryptocurrencies
+
+Real-time price updates
+
+Secure and fast transactions
+
+# Portfolio Management
+
+Empower users with advanced tools to:
+
+Track crypto investments
+
+Monitor portfolio performance
+
+View profit/loss insights
+
+Analyze transaction summaries
+
+# Advanced Wallet Functionality
+# Wallet-to-Wallet Transfer
+
+Secure crypto transfers between users
+
+Fast processing with encrypted transactions
+
+🏦 Withdrawal to Bank Account
+
+Direct withdrawals to linked bank accounts
+
+Integrated with trusted payment gateways
+
+# Add Balance to Wallet
+
+Instantly top up wallet using secure payment options
+
+📜 Transaction History
+📤 Withdrawal History
+
+Track all previous withdrawal transactions
+
+View status and timestamps
+
+# Wallet History
+
+Detailed logs of wallet activities
+
+Deposits, transfers, and trades history
+
+# Search Coin
+
+Search any cryptocurrency instantly
+
+Access detailed coin information
+
+Make informed trading decisions
+
+# Robust Authentication & Security
+
+Security is our top priority. We implement industry-grade protection mechanisms:
+
+✅ Login & Register – Secure user authentication
+
+🔐 Two-Factor Authentication (2FA) – Extra security layer
+
+🔁 Forgot Password – Safe password recovery
+
+🛡️ Spring Security Integration
+
+🔒 Encrypted Transactions & Secure APIs
+
+🛠 Cutting-Edge Technology Stack
+
+Our platform is built using modern, scalable, and high-performance technologies.
+
+# Backend
+
+Spring Boot – High-performance backend framework
+
+MySQL Database – Reliable relational database
+
+Spring Security – Advanced authentication & authorization
+
+Java Mail Sender – Email services & notifications
+
+# Frontend
+
+React – Modern UI development
+
+Tailwind CSS – Elegant and responsive styling
+
+Redux – State management
+
+Axios – API communication
+
+React Router DOM – Seamless navigation
+
+Shadcn UI – Beautiful and accessible UI components
+
+# Payment Gateways
+
+Razorpay – Secure payment processing
+
+Stripe – Global payment solutions
+
+# APIs Integration
+
+CoinGecko API – Real-time crypto market data
+
