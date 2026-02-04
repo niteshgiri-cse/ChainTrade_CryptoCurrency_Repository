@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.65rem;
+
+    --background: #ffffff;
+    --foreground: #020617;
+
+    --card: #ffffff;
+    --card-foreground: #020617;
+
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+
+    --border: #e5e7eb;
+    --input: #e5e7eb;
+
+    --primary: #2563eb;
+    --primary-foreground: #ffffff;
+  }
+
+  * {
+    border-color: var(--border);
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: ui-sans-serif, system-ui, -apple-system;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+@keyframes greenPulse {
+  0% {
+    box-shadow: 0 0 0 rgba(34, 197, 94, 0);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(34, 197, 94, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+@keyframes redPulse {
+  0% {
+    box-shadow: 0 0 0 rgba(239, 68, 68, 0);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.animate-greenPulse {
+  animation: greenPulse 2s infinite;
+}
+
+.animate-redPulse {
+  animation: redPulse 2s infinite;
+}
+body {
+  font-family: 'Inter', sans-serif;
+}
