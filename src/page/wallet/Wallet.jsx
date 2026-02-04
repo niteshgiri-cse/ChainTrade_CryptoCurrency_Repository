@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import {
   Card,
   CardContent,
@@ -27,8 +27,48 @@ import {
 import TopUpFrom from "./TopUpFrom"
 import WithdrawalForm from "./WithdrawalForm"
 import TransferForm from "./TransferForm"
+import { useDispatch, useSelector } from "react-redux"
+import { depositMoney, getUserWallet } from "@/State/Wallet/Action"
+import { useLocation, useNavigate } from "react-router-dom"
 
 const Wallet = () => {
+
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const { userWallet, loading } =
+    useSelector(store => store.wallet)
+
+  const handleFetchUserWallet = () => {
+    dispatch(getUserWallet(localStorage.getItem("jwt")))
+  }
+
+useEffect(() => {
+
+  const query = new URLSearchParams(location.search);
+
+  const orderId = query.get("order_id");
+  const paymentId = query.get("razorpay_payment_id");
+
+  if (orderId && paymentId) {
+
+    dispatch(
+      depositMoney(
+        localStorage.getItem("jwt"),
+        orderId,
+        paymentId
+      )
+    );
+
+    navigate("/wallet", { replace: true });
+  }
+
+  handleFetchUserWallet();
+
+}, [location.search]);
+
+
   return (
     <div className="min-h-screen px-6 py-12 lg:px-20 bg-gradient-to-br from-slate-50 via-white to-slate-100">
 
@@ -49,14 +89,23 @@ const Wallet = () => {
                     My Wallet
                   </CardTitle>
                   <div className="flex items-center gap-2 text-sm text-slate-500">
-                    #A475Ed
+                    DA4OE{userWallet?.id}
                     <CopyIcon className="h-4 w-4 cursor-pointer hover:text-slate-800" />
                   </div>
                 </div>
               </div>
 
-              <Button variant="ghost" size="icon">
-                <ReloadIcon className="h-5 w-5 text-slate-600" />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleFetchUserWallet}
+                disabled={loading}
+              >
+                <ReloadIcon
+                  className={`h-5 w-5 text-slate-600 ${
+                    loading ? "animate-spin" : ""
+                  }`}
+                />
               </Button>
             </div>
           </CardHeader>
@@ -67,7 +116,7 @@ const Wallet = () => {
             <div className="flex items-center gap-3">
               <DollarSign className="h-7 w-7 text-slate-500" />
               <span className="text-3xl font-bold text-slate-900">
-                20,000
+                {userWallet?.balance || 0}
               </span>
               <span className="text-sm font-medium text-slate-500">
                 USD
@@ -77,7 +126,6 @@ const Wallet = () => {
             {/* ACTION BUTTONS */}
             <div className="grid grid-cols-3 gap-4">
 
-              {/* ADD FUNDS */}
               <Dialog>
                 <DialogTrigger asChild>
                   <div className="h-24 rounded-xl bg-emerald-500/90 hover:bg-emerald-600 transition text-white flex flex-col items-center justify-center gap-2 cursor-pointer shadow-sm">
@@ -93,7 +141,6 @@ const Wallet = () => {
                 </DialogContent>
               </Dialog>
 
-              {/* WITHDRAW */}
               <Dialog>
                 <DialogTrigger asChild>
                   <div className="h-24 rounded-xl bg-rose-500/90 hover:bg-rose-600 transition text-white flex flex-col items-center justify-center gap-2 cursor-pointer shadow-sm">
@@ -109,7 +156,6 @@ const Wallet = () => {
                 </DialogContent>
               </Dialog>
 
-              {/* TRANSFER */}
               <Dialog>
                 <DialogTrigger asChild>
                   <div className="h-24 rounded-xl bg-blue-600/90 hover:bg-blue-700 transition text-white flex flex-col items-center justify-center gap-2 cursor-pointer shadow-sm">
@@ -131,7 +177,6 @@ const Wallet = () => {
 
         {/* HISTORY */}
         <div className="space-y-4">
-
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-semibold text-slate-900">
               Transaction History
@@ -141,8 +186,7 @@ const Wallet = () => {
 
           <div className="space-y-3">
             {[1,2,3,4,5].map((_, i) => (
-              <Card
-                key={i}
+              <Card key={i}
                 className="flex items-center justify-between px-5 py-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition"
               >
                 <div className="flex items-center gap-4">
