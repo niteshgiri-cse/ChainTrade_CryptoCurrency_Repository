@@ -14,21 +14,24 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { ReloadIcon, UpdateIcon } from "@radix-ui/react-icons"
+import { ReloadIcon } from "@radix-ui/react-icons"
 import {
-  CopyIcon,
   DollarSign,
-  ShuffleIcon,
   UploadIcon,
   DownloadIcon,
   WalletIcon,
+  ShuffleIcon
 } from "lucide-react"
 
 import TopUpFrom from "./TopUpFrom"
 import WithdrawalForm from "./WithdrawalForm"
 import TransferForm from "./TransferForm"
 import { useDispatch, useSelector } from "react-redux"
-import { depositMoney, getUserWallet } from "@/State/Wallet/Action"
+import {
+  depositMoney,
+  getUserWallet,
+  getWalletTransaction
+} from "@/State/Wallet/Action"
 import { useLocation, useNavigate } from "react-router-dom"
 
 const Wallet = () => {
@@ -37,60 +40,77 @@ const Wallet = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const { userWallet, loading } =
+  const { userWallet, loading, transactions } =
     useSelector(store => store.wallet)
 
-  const handleFetchUserWallet = () => {
-    dispatch(getUserWallet(localStorage.getItem("jwt")))
+  const query = new URLSearchParams(location.search)
+  const orderId = query.get("order_id")
+  const paymentId = query.get("razorpay_payment_id")
+
+  // Initial Load
+  useEffect(() => {
+    const jwt = localStorage.getItem("jwt")
+    dispatch(getUserWallet(jwt))
+    dispatch(getWalletTransaction({ jwt }))
+  }, [])
+
+  // Deposit After Razorpay Redirect
+  useEffect(() => {
+
+    if (!orderId || !paymentId) return
+
+    const jwt = localStorage.getItem("jwt")
+
+    dispatch(depositMoney(jwt, orderId, paymentId))
+      .then(() => {
+        dispatch(getUserWallet(jwt))
+        dispatch(getWalletTransaction({ jwt }))
+      })
+
+    navigate("/wallet", { replace: true })
+
+  }, [orderId, paymentId])
+
+  const handleReload = () => {
+    const jwt = localStorage.getItem("jwt")
+    dispatch(getUserWallet(jwt))
+    dispatch(getWalletTransaction({ jwt }))
   }
 
-useEffect(() => {
-
-  const query = new URLSearchParams(location.search);
-
-  const orderId = query.get("order_id");
-  const paymentId = query.get("razorpay_payment_id");
-
-  if (orderId && paymentId) {
-
-    dispatch(
-      depositMoney(
-        localStorage.getItem("jwt"),
-        orderId,
-        paymentId
-      )
-    );
-
-    navigate("/wallet", { replace: true });
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("en-IN").format(amount)
   }
 
-  handleFetchUserWallet();
-
-}, [location.search]);
-
+  const formatDate = (date) => {
+    if (!date) return ""
+    return new Date(date).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    })
+  }
 
   return (
     <div className="min-h-screen px-6 py-12 lg:px-20 bg-gradient-to-br from-slate-50 via-white to-slate-100">
 
-      <div className="max-w-3xl mx-auto space-y-12">
+      <div className="max-w-4xl mx-auto space-y-12">
 
         {/* WALLET CARD */}
-        <Card className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <CardHeader className="pb-6">
+        <Card className="rounded-3xl border border-slate-200 bg-white shadow-md">
+          <CardHeader>
             <div className="flex items-center justify-between">
 
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center">
-                  <WalletIcon className="h-6 w-6 text-slate-700" />
+                <div className="h-14 w-14 rounded-2xl bg-indigo-100 flex items-center justify-center">
+                  <WalletIcon className="h-7 w-7 text-indigo-600" />
                 </div>
 
                 <div>
-                  <CardTitle className="text-xl font-semibold text-slate-900">
+                  <CardTitle className="text-2xl font-bold text-slate-800">
                     My Wallet
                   </CardTitle>
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
-                    DA4OE{userWallet?.id}
-                    <CopyIcon className="h-4 w-4 cursor-pointer hover:text-slate-800" />
+                  <div className="text-sm text-slate-500">
+                    Wallet ID: {userWallet?.id}
                   </div>
                 </div>
               </div>
@@ -98,28 +118,25 @@ useEffect(() => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleFetchUserWallet}
+                onClick={handleReload}
                 disabled={loading}
               >
                 <ReloadIcon
-                  className={`h-5 w-5 text-slate-600 ${
+                  className={`h-5 w-5 ${
                     loading ? "animate-spin" : ""
                   }`}
                 />
               </Button>
+
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-8">
+          <CardContent className="space-y-6">
 
-            {/* BALANCE */}
             <div className="flex items-center gap-3">
-              <DollarSign className="h-7 w-7 text-slate-500" />
-              <span className="text-3xl font-bold text-slate-900">
-                {userWallet?.balance || 0}
-              </span>
-              <span className="text-sm font-medium text-slate-500">
-                USD
+              <DollarSign className="text-slate-500" />
+              <span className="text-4xl font-bold text-slate-900">
+                {formatCurrency(userWallet?.balance || 0)}
               </span>
             </div>
 
@@ -128,12 +145,12 @@ useEffect(() => {
 
               <Dialog>
                 <DialogTrigger asChild>
-                  <div className="h-24 rounded-xl bg-emerald-500/90 hover:bg-emerald-600 transition text-white flex flex-col items-center justify-center gap-2 cursor-pointer shadow-sm">
-                    <UploadIcon className="h-6 w-6" />
-                    <span className="text-sm font-semibold">Add Funds</span>
+                  <div className="h-24 rounded-2xl bg-green-500 hover:bg-green-600 transition text-white flex flex-col items-center justify-center gap-2 cursor-pointer shadow-md">
+                    <UploadIcon />
+                    Add Funds
                   </div>
                 </DialogTrigger>
-                <DialogContent className="bg-white">
+                <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Add Funds</DialogTitle>
                   </DialogHeader>
@@ -143,12 +160,12 @@ useEffect(() => {
 
               <Dialog>
                 <DialogTrigger asChild>
-                  <div className="h-24 rounded-xl bg-rose-500/90 hover:bg-rose-600 transition text-white flex flex-col items-center justify-center gap-2 cursor-pointer shadow-sm">
-                    <DownloadIcon className="h-6 w-6" />
-                    <span className="text-sm font-semibold">Withdraw</span>
+                  <div className="h-24 rounded-2xl bg-red-500 hover:bg-red-600 transition text-white flex flex-col items-center justify-center gap-2 cursor-pointer shadow-md">
+                    <DownloadIcon />
+                    Withdraw
                   </div>
                 </DialogTrigger>
-                <DialogContent className="bg-white">
+                <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Withdraw Funds</DialogTitle>
                   </DialogHeader>
@@ -158,12 +175,12 @@ useEffect(() => {
 
               <Dialog>
                 <DialogTrigger asChild>
-                  <div className="h-24 rounded-xl bg-blue-600/90 hover:bg-blue-700 transition text-white flex flex-col items-center justify-center gap-2 cursor-pointer shadow-sm">
-                    <ShuffleIcon className="h-6 w-6" />
-                    <span className="text-sm font-semibold">Transfer</span>
+                  <div className="h-24 rounded-2xl bg-blue-600 hover:bg-blue-700 transition text-white flex flex-col items-center justify-center gap-2 cursor-pointer shadow-md">
+                    <ShuffleIcon />
+                    Transfer
                   </div>
                 </DialogTrigger>
-                <DialogContent className="bg-white">
+                <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Transfer Funds</DialogTitle>
                   </DialogHeader>
@@ -175,43 +192,82 @@ useEffect(() => {
           </CardContent>
         </Card>
 
-        {/* HISTORY */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-semibold text-slate-900">
+        {/* TRANSACTION HISTORY */}
+        <div className="space-y-6">
+
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-slate-800">
               Transaction History
             </h2>
-            <UpdateIcon className="h-5 w-5 text-slate-500 cursor-pointer hover:text-slate-700" />
+            <span className="text-sm text-slate-500">
+              {transactions?.length || 0} Records
+            </span>
           </div>
 
-          <div className="space-y-3">
-            {[1,2,3,4,5].map((_, i) => (
-              <Card key={i}
-                className="flex items-center justify-between px-5 py-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition"
+          {transactions?.length === 0 && (
+            <div className="bg-white rounded-2xl p-6 shadow text-center text-slate-500">
+              No transactions found
+            </div>
+          )}
+
+          {transactions?.map((tx) => {
+
+            const isDeposit = tx.type === "DEPOSIT"
+            const isWithdraw = tx.type === "WITHDRAW"
+
+            return (
+              <Card
+                key={tx.id}
+                className="flex items-center justify-between px-6 py-5 rounded-2xl bg-white shadow-sm hover:shadow-lg transition border border-slate-100"
               >
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-slate-100 text-slate-600">
-                      <ShuffleIcon className="h-4 w-4" />
-                    </AvatarFallback>
-                  </Avatar>
+
+                  <div className={`h-12 w-12 rounded-xl flex items-center justify-center
+                    ${
+                      isDeposit
+                        ? "bg-green-100"
+                        : isWithdraw
+                        ? "bg-red-100"
+                        : "bg-blue-100"
+                    }
+                  `}>
+                    {isDeposit ? (
+                      <UploadIcon className="text-green-600" />
+                    ) : isWithdraw ? (
+                      <DownloadIcon className="text-red-600" />
+                    ) : (
+                      <ShuffleIcon className="text-blue-600" />
+                    )}
+                  </div>
 
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      Asset Purchase
+                    <p className="font-semibold text-slate-800">
+                      {tx.purpose || tx.type}
                     </p>
                     <p className="text-xs text-slate-500">
-                      2026-01-09 · 12:39
+                      {formatDate(tx.date)}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      Ref: {tx.transferId}
                     </p>
                   </div>
                 </div>
 
-                <div className="text-sm font-bold text-emerald-600">
-                  + $5,999
+                <div
+                  className={`text-lg font-bold ${
+                    isDeposit
+                      ? "text-green-600"
+                      : isWithdraw
+                      ? "text-red-600"
+                      : "text-blue-600"
+                  }`}
+                >
+                  {isDeposit ? "+" : "-"} ₹{formatCurrency(tx.amount)}
                 </div>
               </Card>
-            ))}
-          </div>
+            )
+          })}
+
         </div>
 
       </div>

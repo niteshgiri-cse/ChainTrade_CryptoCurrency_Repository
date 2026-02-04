@@ -139,6 +139,7 @@ export const depositMoney =
         type: DEPOSIT_MONEY_SUCCESS,
         payload: response.data,
       });
+      console.log("deposit money",response.data);
 
     } catch (error) {
 
