@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import {
   Table,
   TableBody,
@@ -9,45 +9,44 @@ import {
 } from "@/components/ui/table"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-
-const withdrawalData = [
-  {
-    date: "Jan 02, 2026 · 11:45 AM",
-    method: "Bank Transfer",
-    amount: 1200,
-    status: "Completed",
-  },
-  {
-    date: "Jan 05, 2026 · 04:20 PM",
-    method: "UPI",
-    amount: 800,
-    status: "Pending",
-  },
-  {
-    date: "Jan 09, 2026 · 09:10 AM",
-    method: "Bank Transfer",
-    amount: 2500,
-    status: "Completed",
-  },
-]
+import { useDispatch, useSelector } from "react-redux"
+import { getPaymentDetails, getWithdrawalHistory } from "@/State/Withdrawal/Action"
 
 const Withdrawal = () => {
-  const totalWithdrawn = withdrawalData.reduce(
-    (sum, i) => sum + i.amount,
+
+  const dispatch = useDispatch()
+   
+const withdrawal=useSelector(store=>store.withdrawal)
+  const { history = [],loading } = useSelector(
+    store => store.withdrawal
+  )
+  
+console.log(withdrawal)
+  useEffect(() => {
+    dispatch(
+      getWithdrawalHistory({
+        jwt: localStorage.getItem("jwt")
+      }) 
+    )
+     dispatch(getPaymentDetails({jwt:localStorage.getItem("jwt")}));
+  }, [])
+
+  const totalWithdrawn = history.reduce(
+    (sum, item) => sum + (item.amount || 0),
     0
   )
-  const completedAmount = withdrawalData
-    .filter((i) => i.status === "Completed")
-    .reduce((sum, i) => sum + i.amount, 0)
 
-  const pendingAmount = withdrawalData
-    .filter((i) => i.status === "Pending")
-    .reduce((sum, i) => sum + i.amount, 0)
+  const completedAmount = history
+    .filter(item => item.status === "SUCCESS")
+    .reduce((sum, item) => sum + (item.amount || 0), 0)
+
+  const pendingAmount = history
+    .filter(item => item.status === "PENDING")
+    .reduce((sum, item) => sum + (item.amount || 0), 0)
 
   return (
     <div className="min-h-screen px-6 py-10 lg:px-20 bg-slate-50">
 
-      {/* PAGE TITLE */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900">
           Withdrawals
@@ -65,7 +64,7 @@ const Withdrawal = () => {
             Total Withdrawn
           </p>
           <p className="mt-3 text-3xl font-bold text-slate-900">
-            ${totalWithdrawn.toLocaleString()}
+            ₹{totalWithdrawn.toLocaleString()}
           </p>
         </Card>
 
@@ -74,7 +73,7 @@ const Withdrawal = () => {
             Pending
           </p>
           <p className="mt-3 text-3xl font-bold text-yellow-800">
-            ${pendingAmount.toLocaleString()}
+            ₹{pendingAmount.toLocaleString()}
           </p>
         </Card>
 
@@ -83,13 +82,13 @@ const Withdrawal = () => {
             Completed
           </p>
           <p className="mt-3 text-3xl font-bold text-emerald-800">
-            ${completedAmount.toLocaleString()}
+            ₹{completedAmount.toLocaleString()}
           </p>
         </Card>
 
       </div>
 
-      {/* TABLE CARD */}
+      {/* TABLE */}
       <Card className="rounded-2xl border border-slate-200 overflow-hidden">
 
         <div className="px-6 py-4 border-b border-slate-200 bg-white">
@@ -103,7 +102,7 @@ const Withdrawal = () => {
             <TableHeader>
               <TableRow className="bg-slate-50">
                 <TableHead>Date & Time</TableHead>
-                <TableHead>Method</TableHead>
+                <TableHead>Bank</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead className="text-right">
                   Status
@@ -112,37 +111,59 @@ const Withdrawal = () => {
             </TableHeader>
 
             <TableBody>
-              {withdrawalData.map((item, index) => (
-                <TableRow
-                  key={index}
-                  className="hover:bg-slate-50 transition"
-                >
-                  <TableCell className="text-sm text-slate-700">
-                    {item.date}
-                  </TableCell>
+              {history.length > 0 ? (
+                history.map((item, index) => (
+                  <TableRow
+                    key={index}
+                    className="hover:bg-slate-50 transition"
+                  >
 
-                  <TableCell className="font-medium text-slate-900">
-                    {item.method}
-                  </TableCell>
+                    <TableCell className="text-sm text-slate-700">
+                      {item.date
+                        ? new Date(item.date).toLocaleString("en-IN", {
+                            dateStyle: "medium",
+                            timeStyle: "short"
+                          })
+                        : "—"}
+                    </TableCell>
 
-                  <TableCell className="font-semibold text-slate-900">
-                    ${item.amount.toLocaleString()}
-                  </TableCell>
+                    <TableCell className="font-medium text-slate-900">
+                      {withdrawal.paymentDetails?.bankName} ••••
+                      {withdrawal.paymentDetails?.accountNumber
+                        ? withdrawal.paymentDetails?.accountNumber.slice(-4)
+                        : "----"}
+                    </TableCell>
 
-                  <TableCell className="text-right">
-                    {item.status === "Completed" ? (
-                      <Badge className="bg-emerald-100 text-emerald-700">
-                        Completed
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-yellow-100 text-yellow-700">
-                        Pending
-                      </Badge>
-                    )}
+                    <TableCell className="font-semibold text-slate-900">
+                      ₹{(item.amount || 0).toLocaleString()}
+                    </TableCell>
+
+                    <TableCell className="text-right">
+                      {item.status === "SUCCESS" ? (
+                        <Badge className="bg-emerald-100 text-emerald-700">
+                          Completed
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-yellow-100 text-yellow-700">
+                          Pending
+                        </Badge>
+                      )}
+                    </TableCell>
+
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="text-center py-8 text-slate-500"
+                  >
+                    No withdrawal history found
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
+
           </Table>
         </div>
 

@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import {
   Card,
   CardContent,
@@ -15,10 +15,16 @@ import {
 import { Button } from "@/components/ui/button"
 import { Pencil } from "lucide-react"
 import PaymentDetailForm from "./PaymentDetailForm"
+import { useDispatch, useSelector } from "react-redux"
+import { getPaymentDetails } from "@/State/Withdrawal/Action"
 
 function PaymentDetails() {
-  const hasBankDetails = true
-
+  const withdrawal=useSelector(store=>store.withdrawal)
+  const dispatch=useDispatch();
+  useEffect(()=>{
+    dispatch(getPaymentDetails({jwt:localStorage.getItem("jwt")}));
+  },[])
+  
   return (
     <div className="min-h-screen flex justify-center bg-slate-100 px-6 py-20">
 
@@ -34,7 +40,7 @@ function PaymentDetails() {
           </p>
         </div>
 
-        {hasBankDetails ? (
+        {withdrawal.paymentDetails ? (
           <Card className="border border-slate-300 bg-white shadow-md rounded-xl">
 
             {/* CARD HEADER */}
@@ -75,7 +81,7 @@ function PaymentDetails() {
                   Bank Name
                 </span>
                 <span className="text-lg font-bold text-slate-900">
-                  Yes Bank
+                  {withdrawal.paymentDetails?.bankName}
                 </span>
               </div>
 
@@ -84,7 +90,7 @@ function PaymentDetails() {
                   Account Holder
                 </span>
                 <span className="text-lg font-bold text-slate-900">
-                  Nitesh Giri
+                 {withdrawal.paymentDetails?.accountHolderName}
                 </span>
               </div>
 
@@ -93,7 +99,7 @@ function PaymentDetails() {
                   Account Number
                 </span>
                 <span className="text-lg font-bold tracking-wider text-slate-900">
-                  •••• •••• •••• 0463
+                  {withdrawal.paymentDetails?.accountNumber}
                 </span>
               </div>
 
@@ -102,7 +108,7 @@ function PaymentDetails() {
                   IFSC Code
                 </span>
                 <span className="text-lg font-bold text-slate-900">
-                  YESB0001234
+                  {withdrawal.paymentDetails?.ifsc}
                 </span>
               </div>
 

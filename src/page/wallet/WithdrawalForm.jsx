@@ -1,11 +1,53 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { DialogClose } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { House } from "lucide-react"
+import { useDispatch, useSelector } from "react-redux"
+import { getPaymentDetails, requestWithdrawal } from "@/State/Withdrawal/Action"
 
 function WithdrawalForm() {
-  const [amount, setAmount] = useState("")
+  const [amount, setAmount] = useState("");
+const dispatch = useDispatch();
+
+const withdrawal = useSelector(
+  store => store.withdrawal
+);
+
+const { userWallet } = useSelector(
+  store => store.wallet
+);
+
+const handleSubmit = () => {
+
+  const numericAmount = Number(amount);
+
+  if (!numericAmount || numericAmount <= 0) {
+    alert("Enter valid amount");
+    return;
+  }
+
+  if (numericAmount > userWallet?.balance) {
+    alert("Insufficient balance");
+    return;
+  }
+
+  dispatch(
+    requestWithdrawal({
+      amount: numericAmount,
+      jwt: localStorage.getItem("jwt")
+    })
+  );
+};
+
+
+useEffect(() => {
+  dispatch(
+    getPaymentDetails({
+      jwt: localStorage.getItem("jwt")
+    })
+  );
+}, [dispatch]);
 
   return (
     <div className="space-y-10">
@@ -25,12 +67,8 @@ function WithdrawalForm() {
             Available Balance
           </p>
           <p className="text-3xl font-bold text-slate-900">
-            $9,000
+           ₹{(userWallet?.balance || 0)}
           </p>
-        </div>
-
-        <div className="text-sm font-medium text-slate-600">
-          USD
         </div>
       </div>
 
@@ -52,7 +90,7 @@ function WithdrawalForm() {
           type="number"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          placeholder="$9,999"
+          placeholder="₹9999"
           className="
             h-16
             text-center
@@ -101,10 +139,10 @@ function WithdrawalForm() {
 
           <div>
             <p className="text-base font-semibold text-slate-900">
-              Yes Bank
+                {withdrawal.paymentDetails?.bankName}
             </p>
             <p className="text-xs text-slate-500">
-              •••• •••• •••• 0463
+                {withdrawal.paymentDetails?.accountNumber}
             </p>
           </div>
         </div>
@@ -112,7 +150,7 @@ function WithdrawalForm() {
 
       {/* SUBMIT */}
       <DialogClose asChild>
-        <Button
+        <Button 
           className="
             w-full
             h-16
@@ -125,6 +163,7 @@ function WithdrawalForm() {
             shadow-lg
             transition
           "
+          onClick={handleSubmit}
         >
           Withdraw Funds
         </Button>

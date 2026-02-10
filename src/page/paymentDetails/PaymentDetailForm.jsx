@@ -11,8 +11,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { DialogClose } from "@/components/ui/dialog"
+import { useDispatch } from "react-redux"
+import { addPaymentDetails } from "@/State/Withdrawal/Action"
 
 function PaymentDetailForm() {
+  const dispatch=useDispatch();
   const form = useForm({
     defaultValues: {
       ifscCode: "",
@@ -24,7 +27,10 @@ function PaymentDetailForm() {
   })
 
   const onSubmit = (data) => {
-    console.log(data)
+    dispatch(addPaymentDetails({
+      paymentDetails:data,
+      jwt:localStorage.getItem("jwt")
+    }))
   }
 
   return (
@@ -38,7 +44,7 @@ function PaymentDetailForm() {
       "
     >
       {/* HEADER */}
-      <div className="mb-8">
+      <div className="mb-2">
         <h2 className="text-xl font-semibold text-slate-900">
           Bank Account Details
         </h2>
@@ -48,7 +54,7 @@ function PaymentDetailForm() {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)}>
 
           {/* IFSC */}
           <FormField

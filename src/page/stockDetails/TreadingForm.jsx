@@ -1,15 +1,49 @@
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getAssetDetails } from "@/State/Asset/Action";
+import { payOrder } from "@/State/order/Action";
+import { getUserWallet } from "@/State/Wallet/Action";
 import { DotIcon } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 function TreadingForm() {
     const [orderType, setOrderType] = React.useState("BUY"); 
+    const [amount,setAmount]=useState(0);
+    const [quantity,setQuantity]=useState(0);
+    const coin=useSelector(store=>store.coin);
+    const wallet=useSelector(store=>store.wallet);
+    const asset=useSelector(store=>store.asset);
+    console.log(asset)
+    const dispatch=useDispatch();
+    useEffect(()=>{
+      const jwt = localStorage.getItem("jwt")
+          dispatch(getUserWallet(jwt))
+        dispatch(getAssetDetails(coin.coinDetails?.id))
 
+    },[])
   const handleChange = (e) => {
-    console.log("Entered amount:", e.target.value);
+    setAmount(e.target.value)
+    const volume=calculateBuyCost(amount, coin.coinDetails.market_data.current_price.usd);
+    setQuantity(volume);
   };
+  const calculateBuyCost=(amount,price)=>{
+    let volume=amount/price;
+    let decimalPlace=Math.max(2,price.toString().split(".")[0].length)
+    return volume.toFixed(decimalPlace);
+  }
+
+  const handleBuyCrypto=()=>{
+    dispatch(payOrder({jwt:localStorage.getItem("jwt"),
+      amount,
+      orderData:{
+        coinId:coin.coinDetails?.id,
+        quantity,
+        orderType
+      }
+    }))
+  }
   return (
     <div className="space-y-10 p-5">
       <div>
@@ -22,7 +56,7 @@ function TreadingForm() {
             name="amount"
           />
           <div className="border text-2xl  flex justify-center items-center w-36 h-14 rounded-md">
-            <p>4563</p>
+            <p>{quantity}</p>
           </div>
         </div>
         {false && (
@@ -48,10 +82,10 @@ function TreadingForm() {
           <p className="text-gray-400">Bitcoin</p>
         </div>
         <div className="flex items-end gap-2">
-          <p className="text-xl font-bold">$90,362</p>
+          <p className="text-xl font-bold">${coin.coinDetails.market_data?.current_price.usd}</p>
           <p className="text-red-600">
             <span>23234324.53</span>
-            <span>(-2.58%)</span>
+            <span>{coin.coinDetails.price_change_percentage_24h?.toFixed(2)}</span>
           </p>
         </div>
         </div>
@@ -66,11 +100,14 @@ function TreadingForm() {
             {orderType==="BUY"?"Available Cash":"Available Quantity"}
         </p>
         <p>
-          {orderType==="BUY"? "$12,000" : "0.234 BTC"}
+          {orderType==="BUY"?"₹"+(wallet.userWallet?.balance || 0): (asset.assetDetails?.quantity || 0)}
         </p>
         </div>
         <div>
-          <Button className={`w-full py-6  ${orderType === "BUY" ? "bg-green-600 hover:bg-green-500" : "bg-red-600 hover:bg-red-500" }`} >
+          <Button
+              onClick={handleBuyCrypto}
+          
+          className={`w-full py-6  ${orderType === "BUY" ? "bg-green-600 hover:bg-green-500" : "bg-red-600 hover:bg-red-500" }`} >
             {orderType }
           </Button>
           <Button

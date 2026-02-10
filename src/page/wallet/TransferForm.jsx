@@ -1,34 +1,42 @@
-import React from "react"
-import { Button } from "@/components/ui/button"
-import { DialogClose } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { DialogClose } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useDispatch } from "react-redux";
+import { transferMoney } from "@/State/Wallet/Action";
+import { amd } from "globals";
 
 function TransferForm() {
   const [formData, setFormData] = React.useState({
     amount: "",
     walletId: "",
     purpose: "",
-  })
-
+  });
+  const dispatch = useDispatch();
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
-    })
-  }
+    });
+  };
 
   const handleSubmit = () => {
-    console.log(formData)
-  }
+  dispatch(
+    transferMoney(
+      localStorage.getItem("jwt"),
+      formData.walletId,
+      {
+        amount: formData.amount
+      }
+    )
+  );
+};
+
 
   return (
     <div className="space-y-6">
-
-      {/* AMOUNT */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-slate-700">
-          Amount
-        </label>
+        <label className="text-sm font-medium text-slate-700">Amount</label>
         <Input
           name="amount"
           value={formData.amount}
@@ -86,7 +94,6 @@ function TransferForm() {
         />
       </div>
 
-      {/* SUBMIT */}
       <DialogClose asChild>
         <Button
           onClick={handleSubmit}
@@ -105,9 +112,8 @@ function TransferForm() {
           Transfer Funds
         </Button>
       </DialogClose>
-
     </div>
-  )
+  );
 }
 
-export default TransferForm
+export default TransferForm;

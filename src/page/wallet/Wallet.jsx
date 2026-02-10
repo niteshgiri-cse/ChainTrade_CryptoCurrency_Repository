@@ -13,7 +13,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ReloadIcon } from "@radix-ui/react-icons"
 import {
   DollarSign,
@@ -47,16 +46,13 @@ const Wallet = () => {
   const orderId = query.get("order_id")
   const paymentId = query.get("razorpay_payment_id")
 
-  // Initial Load
   useEffect(() => {
     const jwt = localStorage.getItem("jwt")
     dispatch(getUserWallet(jwt))
     dispatch(getWalletTransaction({ jwt }))
   }, [])
 
-  // Deposit After Razorpay Redirect
   useEffect(() => {
-
     if (!orderId || !paymentId) return
 
     const jwt = localStorage.getItem("jwt")
@@ -91,12 +87,12 @@ const Wallet = () => {
   }
 
   return (
-    <div className="min-h-screen px-6 py-12 lg:px-20 bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div className="min-h-screen px-6 py-12 lg:px-20 bg-slate-50">
 
       <div className="max-w-4xl mx-auto space-y-12">
 
         {/* WALLET CARD */}
-        <Card className="rounded-3xl border border-slate-200 bg-white shadow-md">
+        <Card className="rounded-3xl border bg-white shadow-md">
           <CardHeader>
             <div className="flex items-center justify-between">
 
@@ -121,36 +117,37 @@ const Wallet = () => {
                 onClick={handleReload}
                 disabled={loading}
               >
-                <ReloadIcon
-                  className={`h-5 w-5 ${
-                    loading ? "animate-spin" : ""
-                  }`}
-                />
+                <ReloadIcon className={`${loading ? "animate-spin" : ""}`} />
               </Button>
 
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-8">
 
             <div className="flex items-center gap-3">
-              <DollarSign className="text-slate-500" />
               <span className="text-4xl font-bold text-slate-900">
-                {formatCurrency(userWallet?.balance || 0)}
+                ₹{formatCurrency(userWallet?.balance || 0)}
               </span>
             </div>
 
             {/* ACTION BUTTONS */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-6">
 
+              {/* ADD FUNDS */}
               <Dialog>
                 <DialogTrigger asChild>
-                  <div className="h-24 rounded-2xl bg-green-500 hover:bg-green-600 transition text-white flex flex-col items-center justify-center gap-2 cursor-pointer shadow-md">
-                    <UploadIcon />
+                  <Button
+                    variant="outline"
+                    className="h-24 flex flex-col gap-2 
+                    bg-emerald-600 hover:bg-emerald-700
+                    text-white border-0 rounded-2xl shadow-md"
+                  >
+                    <UploadIcon className="h-6 w-6" />
                     Add Funds
-                  </div>
+                  </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="bg-white">
                   <DialogHeader>
                     <DialogTitle>Add Funds</DialogTitle>
                   </DialogHeader>
@@ -158,14 +155,20 @@ const Wallet = () => {
                 </DialogContent>
               </Dialog>
 
+              {/* WITHDRAW */}
               <Dialog>
                 <DialogTrigger asChild>
-                  <div className="h-24 rounded-2xl bg-red-500 hover:bg-red-600 transition text-white flex flex-col items-center justify-center gap-2 cursor-pointer shadow-md">
-                    <DownloadIcon />
+                  <Button
+                    variant="outline"
+                    className="h-24 flex flex-col gap-2 
+                    bg-rose-600 hover:bg-rose-700
+                    text-white border-0 rounded-2xl shadow-md"
+                  >
+                    <DownloadIcon className="h-6 w-6" />
                     Withdraw
-                  </div>
+                  </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="bg-white">
                   <DialogHeader>
                     <DialogTitle>Withdraw Funds</DialogTitle>
                   </DialogHeader>
@@ -173,14 +176,20 @@ const Wallet = () => {
                 </DialogContent>
               </Dialog>
 
+              {/* TRANSFER */}
               <Dialog>
                 <DialogTrigger asChild>
-                  <div className="h-24 rounded-2xl bg-blue-600 hover:bg-blue-700 transition text-white flex flex-col items-center justify-center gap-2 cursor-pointer shadow-md">
-                    <ShuffleIcon />
+                  <Button
+                    variant="outline"
+                    className="h-24 flex flex-col gap-2 
+                    bg-indigo-600 hover:bg-indigo-700
+                    text-white border-0 rounded-2xl shadow-md"
+                  >
+                    <ShuffleIcon className="h-6 w-6" />
                     Transfer
-                  </div>
+                  </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="bg-white">
                   <DialogHeader>
                     <DialogTitle>Transfer Funds</DialogTitle>
                   </DialogHeader>
@@ -189,10 +198,11 @@ const Wallet = () => {
               </Dialog>
 
             </div>
+
           </CardContent>
         </Card>
 
-        {/* TRANSACTION HISTORY */}
+        {/* TRANSACTIONS */}
         <div className="space-y-6">
 
           <div className="flex items-center justify-between">
@@ -218,7 +228,7 @@ const Wallet = () => {
             return (
               <Card
                 key={tx.id}
-                className="flex items-center justify-between px-6 py-5 rounded-2xl bg-white shadow-sm hover:shadow-lg transition border border-slate-100"
+                className="flex items-center justify-between px-6 py-5 rounded-2xl bg-white shadow-sm border"
               >
                 <div className="flex items-center gap-4">
 
@@ -241,20 +251,17 @@ const Wallet = () => {
                   </div>
 
                   <div>
-                    <p className="font-semibold text-slate-800">
+                    <p className="font-semibold">
                       {tx.purpose || tx.type}
                     </p>
                     <p className="text-xs text-slate-500">
                       {formatDate(tx.date)}
                     </p>
-                    <p className="text-xs text-slate-400">
-                      Ref: {tx.transferId}
-                    </p>
                   </div>
                 </div>
 
                 <div
-                  className={`text-lg font-bold ${
+                  className={`font-bold ${
                     isDeposit
                       ? "text-green-600"
                       : isWithdraw

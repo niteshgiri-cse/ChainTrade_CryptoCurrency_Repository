@@ -49,23 +49,22 @@ export const getUserWallet = (jwt) => async (dispatch) => {
 };
 
 
-export const transferMoney = (jwt, walletId, amount) => async (dispatch) => {
+export const transferMoney = (jwt, walletId, data) => async (dispatch) => {
   try {
-    console.log("TRANSFER DATA:", { walletId, amount });
-
     dispatch({ type: TRANSFER_MONEY_REQUEST });
 
     const response = await axios.put(
       `${API_BASE_URL}/api/wallet/${walletId}/transfer`,
-      { amount },
+      {
+        amount: Number(data.amount)   // 🔥 Only send amount
+      },
       {
         headers: {
-          Authorization: `Bearer ${jwt}`
+          Authorization: `Bearer ${jwt}`,
+          "Content-Type": "application/json"
         }
       }
     );
-
-    console.log("TRANSFER RESPONSE:", response.data);
 
     dispatch({
       type: TRANSFER_MONEY_SUCCESS,
@@ -73,8 +72,6 @@ export const transferMoney = (jwt, walletId, amount) => async (dispatch) => {
     });
 
   } catch (error) {
-    console.log("TRANSFER ERROR:", error.response);
-
     dispatch({
       type: TRANSFER_MONEY_FAILURE,
       payload: error.response?.data?.message || "Transfer failed"

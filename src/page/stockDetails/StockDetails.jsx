@@ -17,13 +17,19 @@ import StockChart from "../Home/StockChart";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCoinDetails } from "@/State/coin/Action";
+import { addItemToWatchlist } from "@/State/watchList/Action";
 
 function StockDetails() {
-  const [watchlisted, setWatchlisted] = useState(true);
+  const coin = useSelector((store) => store.coin);
+  const { watchlist } = useSelector((store) => store.watchlist);
+
+const isWatchlisted = watchlist?.coins?.some(
+  (item) => item.id === coin?.coinDetails?.id
+)
 
   const dispatch = useDispatch();
   const { id } = useParams();
-  const coin = useSelector((store) => store.coin);
+  
 
   useEffect(() => {
     if (id) {
@@ -31,31 +37,31 @@ function StockDetails() {
         fetchCoinDetails({
           coinId: id,
           jwt: localStorage.getItem("jwt"),
-        })
+        }),
       );
     }
   }, [dispatch, id]);
 
+  const handleAddToWatchList = () => {
+    dispatch(addItemToWatchlist(coin?.coinDetails?.id));
+    console.log(coin?.coinDetails?.id);
+  };
+
   const marketData = coin?.coinDetails?.market_data;
 
   const price = marketData?.current_price?.usd;
-  const marketCapChange =
-    marketData?.market_cap_change_percentage_24h;
+  const marketCapChange = marketData?.market_cap_change_percentage_24h;
 
   const isNegative = marketCapChange < 0;
 
   return (
     <div className="rounded-xl bg-white border border-gray-200 p-4 sm:p-6 shadow-sm">
-      
       {/* HEADER */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        
         {/* LEFT INFO */}
         <div className="flex items-center gap-4">
           <Avatar className="h-12 w-12 border">
-            <AvatarImage
-              src={coin?.coinDetails?.image?.large}
-            />
+            <AvatarImage src={coin?.coinDetails?.image?.large} />
           </Avatar>
 
           <div>
@@ -64,24 +70,17 @@ function StockDetails() {
                 {coin?.coinDetails?.symbol}
               </span>
               <DotIcon className="h-4 w-4 text-gray-400" />
-              <span className="text-gray-500">
-                {coin?.coinDetails?.name}
-              </span>
+              <span className="text-gray-500">{coin?.coinDetails?.name}</span>
             </div>
 
             <div className="flex items-center gap-2 mt-1">
-              <p
-                className={`text-2xl font-bold text-gray-900 rounded-md`}
-              >
+              <p className={`text-2xl font-bold text-gray-900 rounded-md`}>
                 ${price?.toLocaleString()}
               </p>
 
-              {/* 🔥 REAL MARKET CAP CHANGE WITH COLOR */}
               <span
                 className={`text-sm font-semibold ${
-                  isNegative
-                    ? "text-red-500"
-                    : "text-green-600"
+                  isNegative ? "text-red-500" : "text-green-600"
                 }`}
               >
                 {isNegative ? "" : "+"}
@@ -94,11 +93,11 @@ function StockDetails() {
         {/* ACTION BUTTONS */}
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <Button
-            onClick={() => setWatchlisted(!watchlisted)}
+            onClick={handleAddToWatchList}
             variant="outline"
             className="w-full sm:w-auto border-gray-300 bg-white hover:bg-gray-100 transition"
           >
-            {watchlisted ? (
+            {isWatchlisted ? (
               <BookmarkFilledIcon className="h-5 w-5 text-yellow-500" />
             ) : (
               <BookMarkedIcon className="h-5 w-5 text-gray-500" />
@@ -124,7 +123,6 @@ function StockDetails() {
         </div>
       </div>
 
-      {/* CHART */}
       <div className="mt-6">
         <StockChart coinId={id} />
       </div>
