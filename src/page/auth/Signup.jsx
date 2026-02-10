@@ -7,7 +7,7 @@ function Signup({ goToLogin }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { loading, error, jwt } = useSelector((state) => state.auth);
+  const { loading, jwt } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -37,7 +37,7 @@ function Signup({ goToLogin }) {
 
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
-      <h2 className="text-2xl font-bold text-center text-gray-800">
+      <h2 className="text-2xl font-bold text-gray-800">
         Create Account
       </h2>
 
@@ -81,19 +81,13 @@ function Signup({ goToLogin }) {
         required
       />
 
-      {error && (
-        <p className="text-red-500 text-sm text-center">
-          {error?.data?.message || error || "Something went wrong"}
-        </p>
-      )}
-
       <button
         type="submit"
         disabled={loading}
-        className={`w-full py-3 rounded-xl text-white font-semibold shadow-lg transition ${
+        className={`w-full py-3 rounded text-white font-semibold shadow-lg transition ${
           loading
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-gradient-to-r from-indigo-500 to-purple-500 hover:scale-[1.02]"
+            ? "bg-[#FE6C02] hover:bg-[#d65114] cursor-not-allowed"
+            : "bg-[#FE6C02] hover:bg-[#d65114] hover:scale-[1.02]"
         }`}
       >
         {loading ? "Creating Account..." : "Create Account"}

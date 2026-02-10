@@ -28,8 +28,10 @@ function Login({ goToSignup, goToForgot }) {
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
-      
-      {/* Email */}
+      <h2 className="text-2xl font-bold text-gray-800">
+        Log In
+      </h2>
+    
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Email
@@ -83,16 +85,11 @@ function Login({ goToSignup, goToForgot }) {
         </button>
       </div>
 
-      {/* Error message */}
-      {error && (
-        <p className="text-red-500 text-sm text-center">{error}</p>
-      )}
-
       {/* Submit */}
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-60"
+        className="w-full py-3 rounded bg-[#FE6C02] hover:bg-[#d65114] from-indigo-500 to-purple-500 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-60"
       >
         {loading ? "Signing In..." : "Sign In"}
       </button>

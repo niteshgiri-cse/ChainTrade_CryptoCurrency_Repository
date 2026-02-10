@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Maximize2 } from "lucide-react"
+import { DotIcon, Maximize2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import AssistTable from "./AssistTable"
 import StockChart from "./StockChart"
@@ -114,12 +114,12 @@ const Home = () => {
                   />
 
                   <div>
-                    <div className="text-xl font-semibold text-slate-900">
-                      {selectedCoin.name}
+                    <div className="text font-semibold">
+                     <span className="text-sm text-slate-500 uppercase pr-2">{selectedCoin.symbol} </span><span className="font-semibold">{selectedCoin.name}</span>
                     </div>
 
                     <div className="text-sm text-slate-500 uppercase">
-                      {selectedCoin.symbol}
+                     
                     </div>
 
                     <div className="flex items-center gap-4 mt-2">

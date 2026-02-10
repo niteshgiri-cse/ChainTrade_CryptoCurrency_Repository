@@ -12,7 +12,7 @@ import {
   MagnifyingGlassIcon,
 } from "@radix-ui/react-icons";
 import Sidebar from "./Sidebar";
-import {Atom} from "lucide-react";
+import {Atom, UserRound} from "lucide-react";
 import { useSelector } from "react-redux";
 import store from "@/State/Store";
 
@@ -97,7 +97,7 @@ const Navbar = () => {
           <Avatar className="h-10 w-10 cursor-pointer">
             <AvatarImage src={""} />
             <AvatarFallback className="text-xs font-semibold bg-slate-200 text-slate-800">
-              {auth.user?.username[0].toUpperCase()}
+              {auth.user?.username[0].toUpperCase()||  <UserRound/>}
             </AvatarFallback>
           </Avatar>
         </div>
