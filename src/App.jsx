@@ -20,8 +20,6 @@ function App() {
 
   const auth=useSelector(store=>store.auth);
   const dispatch=useDispatch();
-  console.log("auth----- ",auth)
-
   useEffect(()=>{
     dispatch(getUser( auth.jwt ||localStorage.getItem('jwt')));
   },[auth.jwt])
