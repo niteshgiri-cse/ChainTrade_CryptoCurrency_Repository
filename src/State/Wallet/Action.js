@@ -13,196 +13,173 @@ import {
   TRANSFER_MONEY_SUCCESS,
   TRANSFER_MONEY_FAILURE
 } from "./ActionType";
+
 import { API_BASE_URL } from "@/config/api";
-import { Navigate } from "react-router-dom";
 
 export const getUserWallet = (jwt) => async (dispatch) => {
   try {
-    console.log("GET WALLET JWT:", jwt);
-
     dispatch({ type: GET_USER_WALLET_REQUEST });
 
-    const response = await axios.get(
+    const { data } = await axios.get(
       `${API_BASE_URL}/api/wallet`,
       {
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        }
+        headers: jwt ? { Authorization: `Bearer ${jwt}` } : {}
       }
     );
 
-    console.log("GET WALLET RESPONSE:", response.data);
-
     dispatch({
       type: GET_USER_WALLET_SUCCESS,
-      payload: response.data
+      payload: data
     });
-
   } catch (error) {
-    console.log("GET WALLET ERROR:", error.response);
-
     dispatch({
       type: GET_USER_WALLET_FAILURE,
-      payload: error.response?.data?.message || "Failed to fetch wallet"
+      payload:
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to fetch wallet"
     });
   }
 };
 
-
-export const transferMoney = (jwt, walletId, data) => async (dispatch) => {
+export const transferMoney = (jwt, walletId, formData) => async (dispatch) => {
   try {
     dispatch({ type: TRANSFER_MONEY_REQUEST });
 
-    const response = await axios.put(
+    const { data } = await axios.put(
       `${API_BASE_URL}/api/wallet/${walletId}/transfer`,
+      { amount: Number(formData?.amount) },
       {
-        amount: Number(data.amount)   // 🔥 Only send amount
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-          "Content-Type": "application/json"
-        }
+        headers: jwt ? { Authorization: `Bearer ${jwt}` } : {}
       }
     );
 
     dispatch({
       type: TRANSFER_MONEY_SUCCESS,
-      payload: response.data
+      payload: data
     });
-
   } catch (error) {
     dispatch({
       type: TRANSFER_MONEY_FAILURE,
-      payload: error.response?.data?.message || "Transfer failed"
+      payload:
+        error?.response?.data?.message ||
+        error?.message ||
+        "Transfer failed"
     });
   }
 };
-
 
 export const payOrder = (jwt, orderId) => async (dispatch) => {
   try {
-    console.log("PAY ORDER:", orderId);
-
     dispatch({ type: GET_WALLET_TRANSACTION_REQUEST });
 
-    const response = await axios.put(
+    const { data } = await axios.put(
       `${API_BASE_URL}/api/wallet/order/${orderId}/pay`,
       {},
       {
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        }
+        headers: jwt ? { Authorization: `Bearer ${jwt}` } : {}
       }
     );
 
-    console.log("PAY ORDER RESPONSE:", response.data);
-
     dispatch({
       type: GET_WALLET_TRANSACTION_SUCCESS,
-      payload: response.data
+      payload: data
     });
-
   } catch (error) {
-    console.log("PAY ORDER ERROR:", error.response);
-
     dispatch({
       type: GET_WALLET_TRANSACTION_FAILURE,
-      payload: error.response?.data?.message || "Payment failed"
+      payload:
+        error?.response?.data?.message ||
+        error?.message ||
+        "Payment failed"
     });
   }
 };
-
 
 export const depositMoney =
   (jwt, orderId, paymentId) =>
   async (dispatch) => {
-
     try {
-
       dispatch({ type: DEPOSIT_MONEY_REQUEST });
 
-      const response = await axios.put(
+      const { data } = await axios.put(
         `${API_BASE_URL}/api/wallet/deposit?order_id=${orderId}&payment_id=${paymentId}`,
         null,
         {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-          },
+          headers: jwt ? { Authorization: `Bearer ${jwt}` } : {}
         }
       );
 
       dispatch({
         type: DEPOSIT_MONEY_SUCCESS,
-        payload: response.data,
+        payload: data
       });
-      console.log("deposit money",response.data);
-
     } catch (error) {
-
       dispatch({
         type: DEPOSIT_MONEY_FAILURE,
-        error: error.message,
+        payload:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Deposit failed"
       });
-
     }
   };
 
+export const getWalletTransaction = ({ jwt }) => async (dispatch) => {
+  try {
+    dispatch({ type: GET_WALLET_TRANSACTION_REQUEST });
 
-
-export const getWalletTransaction=({jwt})=>async(dispatch)=>{
-    try {
-        dispatch({type:GET_WALLET_TRANSACTION_REQUEST});
-        const response = await axios.get(
+    const { data } = await axios.get(
       `${API_BASE_URL}/api/wallet/transactions`,
       {
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        }
+        headers: jwt ? { Authorization: `Bearer ${jwt}` } : {}
       }
     );
-    
+
     dispatch({
       type: GET_WALLET_TRANSACTION_SUCCESS,
-      payload: response.data
+      payload: data
     });
-    console.log("GET_WALLET_TRANSACTION_SUCCESS",response.data)
+  } catch (error) {
+    dispatch({
+      type: GET_WALLET_TRANSACTION_FAILURE,
+      payload:
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to fetch transactions"
+    });
+  }
+};
 
-    } catch (error) {
-         console.log("error",error);
-        dispatch({
-            type:GET_WALLET_TRANSACTION_FAILURE,
-            error:error.message
-        })
-    }
-}
 export const paymentHandler =
   ({ jwt, amount, paymentMethod }) =>
   async (dispatch) => {
-
-    dispatch({ type: DEPOSIT_MONEY_REQUEST });
-
     try {
+      dispatch({ type: DEPOSIT_MONEY_REQUEST });
 
-      const response = await axios.post(
+      const { data } = await axios.post(
         `${API_BASE_URL}/api/payment/${paymentMethod}/amount/${amount}`,
         null,
         {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-          },
+          headers: jwt ? { Authorization: `Bearer ${jwt}` } : {}
         }
       );
 
-      // Open Razorpay
-      window.location.href = response.data.payment_url;
-
+      if (data?.payment_url) {
+        window.location.href = data.payment_url;
+      } else {
+        dispatch({
+          type: DEPOSIT_MONEY_FAILURE,
+          payload: "Invalid payment response"
+        });
+      }
     } catch (error) {
-
       dispatch({
         type: DEPOSIT_MONEY_FAILURE,
-        error: error.message,
+        payload:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Payment initiation failed"
       });
-
     }
   };

@@ -1,4 +1,3 @@
-
 import axios from "axios";
 import {
   PAY_ORDER_REQUEST,
@@ -12,39 +11,37 @@ import {
   GET_ALL_ORDERS_FAILURE
 } from "./ActionType";
 
-const baseUrl = "http://localhost:5454";
+import { API_BASE_URL } from "@/config/api";
 
-
-
-export const payOrder = ({orderData,jwt,amount}) => async (dispatch) => {
+export const payOrder = ({ orderData, jwt, amount }) => async (dispatch) => {
   try {
     dispatch({ type: PAY_ORDER_REQUEST });
 
-    const response = await axios.post(
-  `${baseUrl}/api/orders/pay`,
-  orderData,
-  {
-    headers: {
-      Authorization: `Bearer ${jwt}`
-    }
-  }
-);
+    const { data } = await axios.post(
+      `${API_BASE_URL}/api/orders/pay`,
+      orderData,
+      {
+        headers: jwt
+          ? { Authorization: `Bearer ${jwt}` }
+          : {}
+      }
+    );
+
     dispatch({
       type: PAY_ORDER_SUCCESS,
-      payload: response.data,
+      payload: data,
       amount
     });
-    console.log("Order Success",response.data)
-
   } catch (error) {
     dispatch({
       type: PAY_ORDER_FAILURE,
-      payload: error.response?.data?.message || "Payment failed"
+      payload:
+        error?.response?.data?.message ||
+        error?.message ||
+        "Payment failed"
     });
   }
 };
-
-
 
 export const getOrderById = (orderId) => async (dispatch) => {
   try {
@@ -52,59 +49,60 @@ export const getOrderById = (orderId) => async (dispatch) => {
 
     const jwt = localStorage.getItem("jwt");
 
-    const response = await axios.get(
-      `${baseUrl}/api/orders/${orderId}`,
+    const { data } = await axios.get(
+      `${API_BASE_URL}/api/orders/${orderId}`,
       {
-        headers: {
-          Authentication: jwt
-        }
+        headers: jwt
+          ? { Authorization: `Bearer ${jwt}` }
+          : {}
       }
     );
 
     dispatch({
       type: GET_ORDER_SUCCESS,
-      payload: response.data
+      payload: data
     });
-
   } catch (error) {
     dispatch({
       type: GET_ORDER_FAILURE,
-      payload: error.response?.data?.message || "Failed to fetch order"
+      payload:
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to fetch order"
     });
   }
 };
 
+export const getAllOrdersForUser =
+  ({ order_type, asset_symbol, jwt }) =>
+  async (dispatch) => {
+    try {
+      dispatch({ type: GET_ALL_ORDERS_REQUEST });
 
-
-export const getAllOrdersForUser = ({order_type, asset_symbol,jwt}) => async (dispatch) => {
-  try {
-    dispatch({ type: GET_ALL_ORDERS_REQUEST });
-    
-    const response = await axios.get(
-      `${baseUrl}/api/orders`,
-      {
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        },
-        params: {
-          order_type,
-          asset_symbol
+      const { data } = await axios.get(
+        `${API_BASE_URL}/api/orders`,
+        {
+          headers: jwt
+            ? { Authorization: `Bearer ${jwt}` }
+            : {},
+          params: {
+            order_type,
+            asset_symbol
+          }
         }
-      }
-    );
+      );
 
-    dispatch({
-      type: GET_ALL_ORDERS_SUCCESS,
-      payload: response.data
-    });
-    console.log("get all order ",response.data)
-
-  } catch (error) {
-    dispatch({
-      type: GET_ALL_ORDERS_FAILURE,
-      payload: error.response?.data?.message || "Failed to fetch orders"
-    });
-  }
-};
-
-
+      dispatch({
+        type: GET_ALL_ORDERS_SUCCESS,
+        payload: data
+      });
+    } catch (error) {
+      dispatch({
+        type: GET_ALL_ORDERS_FAILURE,
+        payload:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to fetch orders"
+      });
+    }
+  };

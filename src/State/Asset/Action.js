@@ -11,33 +11,34 @@ import {
   GET_ASSET_DETAILS_FAILURE
 } from "./ActonType.js";
 
-const baseUrl = "http://localhost:5454";
+import { API_BASE_URL } from "@/config/api";
 
-export const getAssetById= (assetId) => async (dispatch) => {
+export const getAssetById = (assetId) => async (dispatch) => {
   try {
     dispatch({ type: GET_ASSET_REQUEST });
 
     const jwt = localStorage.getItem("jwt");
 
-    const response = await axios.get(
-      `${baseUrl}/api/assets/${assetId}`,
+    const { data } = await axios.get(
+      `${API_BASE_URL}/api/assets/${assetId}`,
       {
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        }
+        headers: jwt
+          ? { Authorization: `Bearer ${jwt}` }
+          : {}
       }
     );
 
     dispatch({
       type: GET_ASSET_SUCCESS,
-      payload: response.data
+      payload: data
     });
-    console.log("getAssetById",response.data)
-
   } catch (error) {
     dispatch({
       type: GET_ASSET_FAILURE,
-      payload: error.response?.data?.message || "Failed to load asset"
+      payload:
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to load asset"
     });
   }
 };
@@ -48,25 +49,26 @@ export const getAssetDetails = (coinId) => async (dispatch) => {
 
     const jwt = localStorage.getItem("jwt");
 
-    const response = await axios.get(
-      `${baseUrl}/api/asset/coin/${coinId}/user`,
+    const { data } = await axios.get(
+      `${API_BASE_URL}/api/asset/coin/${coinId}/user`,
       {
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        }
+        headers: jwt
+          ? { Authorization: `Bearer ${jwt}` }
+          : {}
       }
     );
 
     dispatch({
       type: GET_ASSET_DETAILS_SUCCESS,
-      payload: response.data
+      payload: data
     });
-    console.log("getAssetByCoinId",response.data)
-
   } catch (error) {
     dispatch({
       type: GET_ASSET_DETAILS_FAILURE,
-      payload: error.response?.data?.message || "Failed to load asset details"
+      payload:
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to load asset details"
     });
   }
 };
@@ -77,24 +79,26 @@ export const getUserAssets = () => async (dispatch) => {
 
     const jwt = localStorage.getItem("jwt");
 
-    const response = await axios.get(
-      `${baseUrl}/api/asset`,
+    const { data } = await axios.get(
+      `${API_BASE_URL}/api/asset`,
       {
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        }
+        headers: jwt
+          ? { Authorization: `Bearer ${jwt}` }
+          : {}
       }
     );
 
     dispatch({
       type: GET_USER_ASSETS_SUCCESS,
-      payload: response.data
+      payload: data
     });
-
   } catch (error) {
     dispatch({
       type: GET_USER_ASSETS_FAILURE,
-      payload: error.response?.data?.message || "Failed to load user assets"
+      payload:
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to load user assets"
     });
   }
 };

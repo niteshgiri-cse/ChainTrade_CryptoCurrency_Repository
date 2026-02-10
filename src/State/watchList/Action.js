@@ -8,7 +8,7 @@ import {
   ADD_TO_WATCHLIST_FAILURE
 } from "./ActionType";
 
-const baseUrl = "http://localhost:5454";
+import { API_BASE_URL } from "@/config/api";
 
 export const getUserWatchlist = () => async (dispatch) => {
   try {
@@ -16,25 +16,26 @@ export const getUserWatchlist = () => async (dispatch) => {
 
     const jwt = localStorage.getItem("jwt");
 
-    const response = await axios.get(
-      `${baseUrl}/api/watchlist/user`,
+    const { data } = await axios.get(
+      `${API_BASE_URL}/api/watchlist/user`,
       {
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        }
+        headers: jwt
+          ? { Authorization: `Bearer ${jwt}` }
+          : {}
       }
     );
 
     dispatch({
       type: GET_WATCHLIST_SUCCESS,
-      payload: response.data
+      payload: data
     });
-    console.log("user watch list",response.data);
-
   } catch (error) {
     dispatch({
       type: GET_WATCHLIST_FAILURE,
-      payload: error.response?.data?.message || "Failed to load watchlist"
+      payload:
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to load watchlist"
     });
   }
 };
@@ -45,24 +46,27 @@ export const addItemToWatchlist = (coinId) => async (dispatch) => {
 
     const jwt = localStorage.getItem("jwt");
 
-    const response = await axios.patch(
-      `${baseUrl}/api/watchlist/add/coin/${coinId}`,{},
+    const { data } = await axios.patch(
+      `${API_BASE_URL}/api/watchlist/add/coin/${coinId}`,
+      {},
       {
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        }
+        headers: jwt
+          ? { Authorization: `Bearer ${jwt}` }
+          : {}
       }
     );
 
     dispatch({
       type: ADD_TO_WATCHLIST_SUCCESS,
-      payload: response.data
+      payload: data
     });
-
   } catch (error) {
     dispatch({
       type: ADD_TO_WATCHLIST_FAILURE,
-      payload: error.response?.data?.message || "Failed to add coin"
+      payload:
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to add coin"
     });
   }
 };
