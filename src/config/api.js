@@ -11,4 +11,3 @@ const getApiBaseUrl = () => {
 
 export const API_BASE_URL = getApiBaseUrl();
 
-console.log("API URL:", API_BASE_URL);
