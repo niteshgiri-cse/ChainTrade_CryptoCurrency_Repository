@@ -1,7 +1,7 @@
 import Navbar from "./page/Navbar/Navbar";
 import Home from "./page/Home/Home";
 import { Route, Routes } from "react-router-dom";
-import Portfolio from "./page/portfolio/portfolio";
+
 import Activity from "./page/Activity/Activity";
 import Wallet from "./page/wallet/Wallet";
 import Withdrawal from "./page/withdrawal/Withdrawal";
@@ -10,11 +10,11 @@ import StockDetails from "./page/stockDetails/StockDetails";
 import WatchList from "./page/watchlist/WatchList";
 import Profile from "./page/profile/Profile";
 import SearchCoins from "./page/searchCoins/SearchCoins";
-import Notfound from "./page/notfound/Notfound";
 import Auth from "./page/auth/Auth";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { getUser } from "./State/Auth/Action";
+import Portfolio from "./page/portfolio/Portfolio";
 
 function App() {
 
