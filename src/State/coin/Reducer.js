@@ -39,6 +39,7 @@ const coinReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: true,
+        coinDetails: null,
         error: null
       }
 
