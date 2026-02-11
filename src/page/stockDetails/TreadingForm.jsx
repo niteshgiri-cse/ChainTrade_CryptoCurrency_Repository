@@ -15,7 +15,7 @@ function TreadingForm() {
     const coin=useSelector(store=>store.coin);
     const wallet=useSelector(store=>store.wallet);
     const asset=useSelector(store=>store.asset);
-    console.log(asset)
+  const marketData = coin?.coinDetails?.market_data;
     const dispatch=useDispatch();
     useEffect(()=>{
       const jwt = localStorage.getItem("jwt")
@@ -70,22 +70,21 @@ function TreadingForm() {
           <Avatar>
             <AvatarImage
               src={
-                "https://cdn.pixabay.com/photo/2021/12/03/10/32/ethereum-6842405_1280.png"
+               coin?.coinDetails?.image?.large
               }
             />
           </Avatar>
         </div>
               <div>
         <div className="flex items-center gap-2">
-          <p>BTC</p>
+          <p>{coin.coinDetails?.symbol.toUpperCase()}</p>
           <DotIcon className="text-gray-400" />
-          <p className="text-gray-400">Bitcoin</p>
+          <p className="text-gray-400">{coin?.coinDetails?.name}</p>
         </div>
         <div className="flex items-end gap-2">
           <p className="text-xl font-bold">${coin.coinDetails.market_data?.current_price.usd}</p>
           <p className="text-red-600">
-            <span>23234324.53</span>
-            <span>{coin.coinDetails.price_change_percentage_24h?.toFixed(2)}</span>
+            <span>{marketData?.market_cap_change_percentage_24h}</span>
           </p>
         </div>
         </div>
