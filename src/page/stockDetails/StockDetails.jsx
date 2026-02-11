@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { BookmarkFilledIcon } from "@radix-ui/react-icons";
@@ -20,16 +20,15 @@ import { fetchCoinDetails } from "@/State/coin/Action";
 import { addItemToWatchlist } from "@/State/watchList/Action";
 
 function StockDetails() {
-  const coin = useSelector((store) => store.coin);
-  const { watchlist } = useSelector((store) => store.watchlist);
-
-const isWatchlisted = watchlist?.coins?.some(
-  (item) => item.id === coin?.coinDetails?.id
-)
-
   const dispatch = useDispatch();
   const { id } = useParams();
-  
+
+  const { coinDetails, loading } = useSelector((store) => store.coin);
+  const { watchlist } = useSelector((store) => store.watchlist);
+
+  const isWatchlisted = watchlist?.coins?.some(
+    (item) => item.id === coinDetails?.id
+  );
 
   useEffect(() => {
     if (id) {
@@ -37,44 +36,56 @@ const isWatchlisted = watchlist?.coins?.some(
         fetchCoinDetails({
           coinId: id,
           jwt: localStorage.getItem("jwt"),
-        }),
+        })
       );
     }
   }, [dispatch, id]);
 
   const handleAddToWatchList = () => {
-    dispatch(addItemToWatchlist(coin?.coinDetails?.id));
-    console.log(coin?.coinDetails?.id);
+    if (!coinDetails?.id) return;
+    dispatch(addItemToWatchlist(coinDetails.id));
   };
 
-  const marketData = coin?.coinDetails?.market_data;
-
+  const marketData = coinDetails?.market_data;
   const price = marketData?.current_price?.usd;
-  const marketCapChange = marketData?.market_cap_change_percentage_24h;
+  const marketCapChange =
+    marketData?.market_cap_change_percentage_24h || 0;
 
   const isNegative = marketCapChange < 0;
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64 bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="w-12 h-12 border-4 border-gray-300 border-t-green-600 rounded-full animate-spin"></div>
+          <p className="text-gray-600 text-sm font-medium">
+        Fetching coin details...
+      </p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl bg-white border border-gray-200 p-4 sm:p-6 shadow-sm">
-      {/* HEADER */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        {/* LEFT INFO */}
+        
         <div className="flex items-center gap-4">
           <Avatar className="h-12 w-12 border">
-            <AvatarImage src={coin?.coinDetails?.image?.large} />
+            <AvatarImage src={coinDetails?.image?.large} />
           </Avatar>
 
           <div>
             <div className="flex items-center gap-2 text-sm">
               <span className="font-semibold text-gray-900 uppercase">
-                {coin?.coinDetails?.symbol}
+                {coinDetails?.symbol}
               </span>
               <DotIcon className="h-4 w-4 text-gray-400" />
-              <span className="text-gray-500">{coin?.coinDetails?.name}</span>
+              <span className="text-gray-500">
+                {coinDetails?.name}
+              </span>
             </div>
 
             <div className="flex items-center gap-2 mt-1">
-              <p className={`text-2xl font-bold text-gray-900 rounded-md`}>
+              <p className="text-2xl font-bold text-gray-900">
                 ${price?.toLocaleString()}
               </p>
 
@@ -90,10 +101,10 @@ const isWatchlisted = watchlist?.coins?.some(
           </div>
         </div>
 
-        {/* ACTION BUTTONS */}
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <Button
             onClick={handleAddToWatchList}
+            disabled={loading}
             variant="outline"
             className="w-full sm:w-auto border-gray-300 bg-white hover:bg-gray-100 transition"
           >
