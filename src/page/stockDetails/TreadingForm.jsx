@@ -1,3 +1,5 @@
+"use client";
+
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +10,11 @@ import { DotIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
+const USD_RATE = 85; // 1 USD = ₹85
+
 function TreadingForm() {
   const [orderType, setOrderType] = useState("BUY");
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState(""); // amount in ₹
   const [quantity, setQuantity] = useState(0);
 
   const coin = useSelector((store) => store.coin);
@@ -36,18 +40,17 @@ function TreadingForm() {
     }
   }, [coinDetails?.id, dispatch]);
 
-  const calculateBuyCost = (amt, price) => {
-    if (!amt || !price) return 0;
-    let volume = amt / price;
-    let decimalPlace = Math.max(
-      2,
-      price.toString().split(".")[0].length
-    );
-    return Number(volume.toFixed(decimalPlace));
+  const calculateBuyCost = (rupees, priceInUsd) => {
+    if (!rupees || !priceInUsd) return 0;
+
+    const amountInUsd = rupees / USD_RATE;
+    const volume = amountInUsd / priceInUsd;
+
+    return Number(volume.toFixed(6));
   };
 
   const handleChange = (e) => {
-    const value = e.target.value;
+    const value = Number(e.target.value);
     setAmount(value);
 
     if (currentPrice) {
@@ -62,10 +65,12 @@ function TreadingForm() {
     const jwt = localStorage.getItem("jwt");
     if (!jwt || !coinDetails?.id) return;
 
+    const amountInUsd = amount / USD_RATE;
+
     dispatch(
       payOrder({
         jwt,
-        amount,
+        amount: amountInUsd,
         orderData: {
           coinId: coinDetails.id,
           quantity,
@@ -90,7 +95,7 @@ function TreadingForm() {
         <div className="flex gap-4 items-center justify-between">
           <Input
             className="py-7 focus:outline-none"
-            placeholder="Enter amount..."
+            placeholder="Enter amount in ₹..."
             onChange={handleChange}
             type="number"
             value={amount}
@@ -145,7 +150,7 @@ function TreadingForm() {
       <div className="flex items-center justify-between">
         <p>
           {orderType === "BUY"
-            ? "Available Cash"
+            ? "Available Cash (₹)"
             : "Available Quantity"}
         </p>
 
