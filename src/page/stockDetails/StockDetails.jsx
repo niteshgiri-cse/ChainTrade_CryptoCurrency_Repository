@@ -31,14 +31,24 @@ function StockDetails() {
   );
 
   useEffect(() => {
-    if (id) {
+    if (!id) return;
+
+    const jwt = localStorage.getItem("jwt");
+
+    const fetchData = () => {
       dispatch(
         fetchCoinDetails({
           coinId: id,
-          jwt: localStorage.getItem("jwt"),
+          jwt,
         })
       );
-    }
+    };
+
+    fetchData();
+
+    const interval = setInterval(fetchData, 30000);
+
+    return () => clearInterval(interval);
   }, [dispatch, id]);
 
   const handleAddToWatchList = () => {
@@ -57,9 +67,9 @@ function StockDetails() {
     return (
       <div className="flex items-center justify-center h-64 bg-white rounded-xl border border-gray-200 shadow-sm">
         <div className="w-12 h-12 border-4 border-gray-300 border-t-green-600 rounded-full animate-spin"></div>
-          <p className="text-gray-600 text-sm font-medium">
-        Fetching coin details...
-      </p>
+        <p className="text-gray-600 text-sm font-medium">
+          Fetching coin details...
+        </p>
       </div>
     );
   }
@@ -67,7 +77,6 @@ function StockDetails() {
   return (
     <div className="rounded-xl bg-white border border-gray-200 p-4 sm:p-6 shadow-sm">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        
         <div className="flex items-center gap-4">
           <Avatar className="h-12 w-12 border">
             <AvatarImage src={coinDetails?.image?.large} />

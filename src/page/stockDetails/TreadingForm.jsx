@@ -10,16 +10,17 @@ import { DotIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-const USD_RATE = 85; // 1 USD = ₹85
+const USD_RATE = 85;
 
 function TreadingForm() {
   const [orderType, setOrderType] = useState("BUY");
-  const [amount, setAmount] = useState(""); // amount in ₹
+  const [amount, setAmount] = useState(0);
   const [quantity, setQuantity] = useState(0);
 
   const coin = useSelector((store) => store.coin);
   const wallet = useSelector((store) => store.wallet);
   const asset = useSelector((store) => store.asset);
+  const order = useSelector((store) => store.order);
 
   const dispatch = useDispatch();
 
@@ -29,33 +30,32 @@ function TreadingForm() {
 
   useEffect(() => {
     const jwt = localStorage.getItem("jwt");
-    if (jwt) {
-      dispatch(getUserWallet(jwt));
-    }
+    if (jwt) dispatch(getUserWallet(jwt));
   }, [dispatch]);
 
   useEffect(() => {
-    if (coinDetails?.id) {
-      dispatch(getAssetDetails(coinDetails.id));
-    }
+    if (coinDetails?.id) dispatch(getAssetDetails(coinDetails.id));
   }, [coinDetails?.id, dispatch]);
+
+  useEffect(() => {
+    if (order?.success) {
+      setAmount(0);
+      setQuantity(0);
+    }
+  }, [order?.success]);
 
   const calculateBuyCost = (rupees, priceInUsd) => {
     if (!rupees || !priceInUsd) return 0;
-
     const amountInUsd = rupees / USD_RATE;
     const volume = amountInUsd / priceInUsd;
-
     return Number(volume.toFixed(6));
   };
 
   const handleChange = (e) => {
     const value = Number(e.target.value);
     setAmount(value);
-
     if (currentPrice) {
-      const volume = calculateBuyCost(value, currentPrice);
-      setQuantity(volume);
+      setQuantity(calculateBuyCost(value, currentPrice));
     } else {
       setQuantity(0);
     }
@@ -65,12 +65,10 @@ function TreadingForm() {
     const jwt = localStorage.getItem("jwt");
     if (!jwt || !coinDetails?.id) return;
 
-    const amountInUsd = amount / USD_RATE;
-
     dispatch(
       payOrder({
         jwt,
-        amount: amountInUsd,
+        amount: Number(amount),
         orderData: {
           coinId: coinDetails.id,
           quantity,
@@ -98,7 +96,7 @@ function TreadingForm() {
             placeholder="Enter amount in ₹..."
             onChange={handleChange}
             type="number"
-            value={amount}
+            value={amount || ""}
           />
 
           <div className="border text-2xl flex justify-center items-center w-36 h-14 rounded-md">
@@ -126,9 +124,7 @@ function TreadingForm() {
           </div>
 
           <div className="flex items-end gap-2">
-            <p className="text-xl font-bold">
-              ${currentPrice}
-            </p>
+            <p className="text-xl font-bold">${currentPrice}</p>
             <p
               className={
                 marketData?.market_cap_change_percentage_24h > 0
